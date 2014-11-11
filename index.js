@@ -22,22 +22,22 @@ function RunSequence(gulp) {
 
 
 /**
- * Runs the actual execution of the sequence of tasks
+ * Starts the actual execution of the sequence of tasks via Orchestrator
+ * @param {array} taskSets
+ * @param {function} callback
  */
-RunSequence.prototype.run = function() {
+RunSequence.prototype.start = function(taskSets, callback) {
 	var self = this,
-		taskSets = Array.prototype.slice.call(arguments),
-		callBack = typeof taskSets[taskSets.length - 1] === 'function' ? taskSets.pop() : false,
 		currentTaskSet;
 
-		console.log(taskSets);
-		console.log(callBack);
+	taskSets = taskSets || [];
+	callback = typeof callback === 'function' ? callback : false;
 
-		var finish = function (err) {
+	var finish = function (err) {
 			self._gulp.removeListener('task_stop', onTaskEnd);
 			self._gulp.removeListener('task_err', onError);
-			if (callBack) {
-				callBack(err);
+			if(callback) {
+				callback(err);
 			} else if (err) {
 				console.log(colors.red('Error running task sequence:'), err);
 			}
@@ -46,6 +46,7 @@ RunSequence.prototype.run = function() {
 		onError = function (err) {
 			finish(err);
 		},
+
 		onTaskEnd = function (event) {
 			var idx = currentTaskSet.indexOf(event.task);
 			if (idx > -1) {
@@ -99,7 +100,7 @@ RunSequence.prototype.verifyTaskSets = function(taskSets, skipArrays) {
 			throw new Error("Task "+t+" is not a valid task string.");
 		}
 		if(isTask && !self._gulp.hasTask(t)) {
-			throw new Error("Task "+t+" is not configured as a task on gulp.  If this is a submodule, you may need to use require('run-sequence').use(gulp).");
+			throw new Error("Task "+t+" is not configured as a task on gulp.");
 		}
 		if(skipArrays && isTask) {
 			if(foundTasks[t]) {
