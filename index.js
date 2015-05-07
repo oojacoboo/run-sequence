@@ -112,7 +112,7 @@ RunSequence.prototype.verifyTaskSets = function(taskSets, skipArrays) {
 			if(t.length === 0) {
 				throw new Error("An empty array was provided as a task set");
 			}
-			this.verifyTaskSets(t, true, foundTasks);
+			self.verifyTaskSets(t, true, foundTasks);
 		}
 	});
 }
